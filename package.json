@@ -29,10 +29,12 @@
     "@tailwindcss/cli": "^4.1.18",
     "@tailwindcss/vite": "^4.1.18",
     "axios": "^1.13.2",
+    "body-parser": "^2.2.2",
     "chart.js": "^4.5.1",
     "electron-fetch": "^1.9.1",
     "electron-squirrel-startup": "^1.0.1",
     "electron-updater": "^6.3.9",
+    "express": "^5.2.1",
     "primevue": "^4.5.4",
     "tailwindcss": "^4.1.18"
   },

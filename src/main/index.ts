@@ -1,7 +1,8 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
+import icon from '../../resources/ball.png?asset'
+import fetch from 'node-fetch'
 
 function createWindow(): void {
   // Create the browser window.
@@ -9,8 +10,8 @@ function createWindow(): void {
     show: false,
     useContentSize: true,
     autoHideMenuBar: true,
-    width: 1004,
-    height: 734,
+    width: 1014,
+    height: 754,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -35,6 +36,38 @@ function createWindow(): void {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
 }
+
+ipcMain.handle('get-teams', async (event, token) => {
+  const res = await fetch('https://api.football-data.org/v4/competitions/PL/teams', {
+    headers: {
+      'X-Auth-Token': token,
+      'Content-Type': 'application/json'
+    }
+  })
+
+  const data = await res.json()
+
+  return data
+});
+
+ipcMain.handle('get-prediction', async (event, apiUrl: string, teams: { firstTeam: string; secondTeam: string }) => {
+    const params = new URLSearchParams({
+      firstTeam: teams.firstTeam,
+      secondTeam: teams.secondTeam
+    })
+
+    const url = `${apiUrl}?${params.toString()}`
+
+    const res = await fetch(url, { method: 'GET' })
+
+    if (!res.ok) {
+      return { success: false, error: `Error: ${res.status} ${res.statusText}` }
+    }
+
+    const data = await res.json()
+    return data
+  }
+)
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
