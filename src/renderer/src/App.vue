@@ -4,52 +4,71 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Panel from 'primevue/panel';
 import Divider from 'primevue/divider';
-import { ref } from 'vue';
-import { getScoreByTeam } from './api/api';
+import { onMounted, ref } from 'vue';
+import Select from 'primevue/select';
+import { getTeamsList } from './api/api';
 
-const teamName = ref('');
+const apiUrl = ref('http://localhost:8080/score-prediction');
+const firstTeam = ref();
+const secondTeam = ref();
+const allTeams = ref(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].map((el) => ({ name: el })));
 
-const teamScores = ref<{teamName: string, predictedScore: number}[]>([]);
+const scores = ref<{firstTeam: string, predictedScore: string, secondTeam: string}[]>([]);
+
+const error = ref(false);
 
 const predictScore = async () => {
-  if (teamName.value.length > 0) {
-    teamScores.value.unshift({
-      teamName: teamName.value,
-      predictedScore: Math.floor(Math.random() * 100)
+  if (firstTeam.value && secondTeam.value) {
+    scores.value.unshift({
+      firstTeam: firstTeam.value.name,
+      predictedScore: Math.floor(Math.random() * 5) + "-" + Math.floor(Math.random() * 5),
+      secondTeam: secondTeam.value.name,
     });
 
-    // const res = await getScoreByTeam(teamName.value);
+    // const res = await getScoreByTeam(apiUrl.value, { firstTeam: firstTeam.value.name, secondTeam: secondTeam.value.name });
 
     // if (res) {
-    //   teamScores.value.unshift({
-    //     teamName: teamName.value,
-    //     predictedScore: res.predictedScore
+    //   scores.value.unshift({
+    //     firstTeam: firstTeam.value.name,
+    //     predictedScore: res.predictedScore,
+    //     secondTeam: secondTeam.value.name,
     //   });
+
+    //   error.value = false;
+    // } else {
+    //   error.value = true;
     // }
   };
 }
 </script>
 
 <template>
-  <Toast />
   <div class="grid gap-2 m-2">
-    <Panel header="Prediction">
-      <div class="grid grid-cols-[1fr_auto_min-content] gap-2">
-        <div class="grid gap-2">
-          <InputText v-model="teamName" placeholder="Team name..." />
-          <Button label="Predict" @click="predictScore"/>
+    <InputText size="small" :invalid="error" v-model="apiUrl" class="w-full" placeholder="API URL..." />
+    <Panel>
+      <div class="grid grid-cols-[1fr_auto_auto_auto_1fr] gap-2">
+        <div class="flex flex-col gap-2">
+          <label class="font-bold mx-auto text-lg">First team</label>
+          <Select size="large" v-model="firstTeam" filter :options="allTeams.filter((el) => el !== secondTeam)" optionLabel="name" placeholder="First team name... " class="w-full" />
         </div>
         <Divider layout="vertical" />
         <div class="grid gap-2">
-          <label class="font-bold mx-auto text-lg">Score</label>
-          <InputText class="pointer-events-none text-lg! text-center" :placeholder="teamScores[0]?.predictedScore.toString() || 'Predicted score...'"/>
+          <label class="font-bold mx-auto text-lg">Predicted Score</label>
+          <InputText size="large" class="pointer-events-none text-lg! text-center" :placeholder="scores[0]?.predictedScore.toString() || 'Predicted score...'"/>
+          <Button class="w-full" label="Predict score" @click="predictScore" />
+        </div>
+        <Divider layout="vertical" />
+        <div class="flex flex-col gap-2">
+          <label class="font-bold mx-auto text-lg">Second team</label>
+          <Select size="large" v-model="secondTeam" filter :options="allTeams.filter((el) => el !== firstTeam)" optionLabel="name" placeholder="First team name... " class="w-full" />
         </div>
       </div> 
     </Panel>
-    <Panel header="Matches scores table" class="flex flex-column h-118">
-      <DataTable columnResizeMode="expand" scrollable scrollHeight="100%" :value="teamScores" size="large" showGridlines paginator :rows="5" removableSort>
-        <Column field="teamName" header="Team Name" sortable style="width: 50%;" />
-        <Column field="predictedScore" header="Predicted Score" sortable style="width: 50%"/>
+    <Panel header="Predicted scores table" class="flex flex-column h-118">
+      <DataTable columnResizeMode="expand" scrollable scrollHeight="100%" :value="scores" size="large" showGridlines paginator :rows="5" removableSort>
+        <Column :style="{ textAlign: 'center' }" field="firstTeam" header="First Team" sortable class="w-1/3" />
+        <Column :style="{ textAlign: 'center' }" field="predictedScore" header="Predicted Score" sortable class="w-1/3" />
+        <Column :style="{ textAlign: 'center' }" field="secondTeam" header="Second Team" sortable class="w-1/3" />
       </DataTable>
     </Panel>
   </div>

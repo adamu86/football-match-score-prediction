@@ -9,8 +9,8 @@ function createWindow(): void {
     show: false,
     useContentSize: true,
     autoHideMenuBar: true,
-    width: 600,
-    height: 659,
+    width: 1004,
+    height: 734,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
