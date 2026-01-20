@@ -1,0 +1,5 @@
+@import "tailwindcss";
+
+:deep(.p-datatable-paginator-bottom) {
+  order: 2 !important;
+}
