@@ -96,7 +96,7 @@ const predictScore = async () => {
             filter 
             :options="allTeams.filter(el => el.name !== awayTeam?.name)"
             optionLabel="name" 
-            placeholder="First team name... " 
+            placeholder="Home team name... " 
             class="w-full" 
           />
         </div>
@@ -124,7 +124,7 @@ const predictScore = async () => {
             v-model="awayTeam" 
             :options="allTeams.filter(el => el.name !== homeTeam?.name)"
             optionLabel="name" 
-            placeholder="First team name... " 
+            placeholder="Away team name... " 
             class="w-full" 
           />
         </div>
