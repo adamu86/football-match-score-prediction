@@ -36,9 +36,9 @@ const allTeams = [
   { name: "Chelsea" }
 ];
 
-const scores = ref<{ 
-  homeTeam: string, 
-  awayTeam: string, 
+const scores = ref<{
+  homeTeam: string,
+  awayTeam: string,
   homeWin: number,
   awayWin: number,
   draw: number,
@@ -47,11 +47,11 @@ const scores = ref<{
 const predictScore = async () => {
   if (homeTeam.value && awayTeam.value) {
     const res = await window.electron.ipcRenderer.invoke(
-      'get-prediction', 
-      apiUrl.value, 
-      { 
+      'get-prediction',
+      apiUrl.value,
+      {
         homeTeam: homeTeam.value.name,
-        awayTeam: awayTeam.value.name 
+        awayTeam: awayTeam.value.name
       }
     );
 
@@ -71,33 +71,112 @@ const predictScore = async () => {
 <template>
   <div class="grid gap-2 m-2">
     <div class="flex gap-2">
-      <InputText size="small" v-model="apiUrl" class="w-full" placeholder="API URL..." />
-      <!-- <InputText size="small" v-model="apiToken" class="w-full" placeholder="API Token..." /> -->
+      <InputText 
+        size="small" 
+        v-model="apiUrl" 
+        class="w-full" 
+        placeholder="API URL..." 
+      />
+      <!-- <InputText 
+        size="small" 
+        v-model="apiToken" 
+        class="w-full" 
+        placeholder="API Token..." 
+      /> -->
     </div>
     <Panel>
       <div class="grid grid-cols-[1fr_auto_auto_auto_1fr] gap-2">
         <div class="flex flex-col gap-2">
-          <label class="font-bold mx-auto text-lg">Home Team</label>
-          <Select size="large" v-model="homeTeam" filter :options="allTeams.filter(el => el.name !== awayTeam?.name)" optionLabel="name" placeholder="First team name... " class="w-full" />
+          <label class="font-bold mx-auto text-lg">
+            Home Team
+          </label>
+          <Select 
+            size="large" 
+            v-model="homeTeam" 
+            filter 
+            :options="allTeams.filter(el => el.name !== awayTeam?.name)"
+            optionLabel="name" 
+            placeholder="First team name... " 
+            class="w-full" 
+          />
         </div>
-        <Divider layout="vertical" />
+        <Divider 
+          layout="vertical" 
+        />
         <div class="grid gap-2">
-          <Button class="w-full" size="large" label="Prediction" @click="predictScore" />
+          <Button   
+            class="w-full" 
+            size="large" 
+            label="Prediction" 
+            @click="predictScore" 
+          />
         </div>
-        <Divider layout="vertical" />
+        <Divider 
+          layout="vertical" 
+        />
         <div class="flex flex-col gap-2">
-          <label class="font-bold mx-auto text-lg">Away Team</label>
-          <Select size="large" v-model="awayTeam" filter :options="allTeams.filter(el => el.name !== homeTeam?.name)" optionLabel="name" placeholder="First team name... " class="w-full" />
+          <label class="font-bold mx-auto text-lg">
+            Away Team
+          </label>
+          <Select 
+            size="large" 
+            filter 
+            v-model="awayTeam" 
+            :options="allTeams.filter(el => el.name !== homeTeam?.name)"
+            optionLabel="name" 
+            placeholder="First team name... " 
+            class="w-full" 
+          />
         </div>
-      </div> 
+      </div>
     </Panel>
-    <Panel header="Predicted probabilities" class="flex flex-column h-118">
-      <DataTable columnResizeMode="expand" scrollable scrollHeight="100%" :value="scores" size="large" showGridlines paginator :rows="5" removableSort>
-        <Column :style="{ textAlign: 'center' }" field="homeTeam" header="Home Team" sortable class="w-1/5" />
-        <Column :style="{ textAlign: 'center' }" field="homeWin" header="Home Win Prob" class="w-1/5" />
-        <Column :style="{ textAlign: 'center' }" field="draw" header="Draw Prob" class="w-1/5" />
-        <Column :style="{ textAlign: 'center' }" field="awayWin" header="Away Win Prob" class="w-1/5" />
-        <Column :style="{ textAlign: 'center' }" field="awayTeam" header="Away Team" sortable class="w-1/5" />
+    <Panel 
+      header="Predicted probabilities" 
+      class="flex flex-column h-118"
+    >
+      <DataTable 
+        columnResizeMode="expand" 
+        scrollable 
+        scrollHeight="100%" 
+        :value="scores" 
+        size="large" 
+        showGridlines
+        paginator 
+        :rows="5" 
+        removableSort
+      >
+        <Column 
+          :style="{ textAlign: 'center' }" 
+          field="homeTeam" 
+          header="Home Team" 
+          sortable 
+          class="w-1/5" 
+        />
+        <Column 
+          :style="{ textAlign: 'center' }" 
+          field="homeWin" 
+          header="Home Win Prob" 
+          class="w-1/5" 
+        />
+        <Column 
+          :style="{ textAlign: 'center' }" 
+          field="draw" 
+          header="Draw Prob" 
+          class="w-1/5" 
+        />
+        <Column 
+          :style="{ textAlign: 'center' }" 
+          field="awayWin" 
+          header="Away Win Prob" 
+          class="w-1/5" 
+        />
+        <Column 
+          :style="{ textAlign: 'center' }" 
+          field="awayTeam" 
+          header="Away Team" 
+          sortable 
+          class="w-1/5" 
+        />
       </DataTable>
     </Panel>
   </div>
