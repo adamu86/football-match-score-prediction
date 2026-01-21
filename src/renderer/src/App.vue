@@ -4,24 +4,47 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Panel from 'primevue/panel';
 import Divider from 'primevue/divider';
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import Select from 'primevue/select';
 
-const apiUrl = ref('http://localhost:8080/score-prediction');
-const apiToken = ref('08b4becd5ec4458f851f529c019aca36');
-const firstTeam = ref();
-const secondTeam = ref();
-const allTeams = ref([]);
-const scores = ref<{firstTeam: string, predictedScore: string, secondTeam: string}[]>([]);
+const apiUrl = ref('http://127.0.0.1:8000/predict');
+// const apiToken = ref('08b4becd5ec4458f851f529c019aca36');
+const firstTeam = ref<{ name: string }>();
+const secondTeam = ref<{ name: string }>();
+const allTeams = [
+  { name: "Liverpool" },
+  { name: "Bournemouth" },
+  { name: "Aston Villa" },
+  { name: "Newcastle" },
+  { name: "Brighton" },
+  { name: "Fulham" },
+  { name: "Sunderland" },
+  { name: "West Ham" },
+  { name: "Tottenham" },
+  { name: "Burnley" },
+  { name: "Wolves" },
+  { name: "Man City" },
+  { name: "Chelsea" },
+  { name: "Crystal Palace" },
+  { name: "Nott'm Forest" },
+  { name: "Brentford" },
+  { name: "Man United" },
+  { name: "Arsenal" },
+  { name: "Leeds" },
+  { name: "Everton" },
+  { name: "West Ham" },
+  { name: "Chelsea" }
+];
+const scores = ref<{ 
+  firstTeam: string, 
+  secondTeam: string, 
+  homeWin: number,
+  awayWin: number,
+  draw: number,
+}[]>([]);
 
 const predictScore = async () => {
   if (firstTeam.value && secondTeam.value) {
-    // scores.value.unshift({
-    //   firstTeam: firstTeam.value.name,
-    //   predictedScore: Math.floor(Math.random() * 5) + "-" + Math.floor(Math.random() * 5),
-    //   secondTeam: secondTeam.value.name,
-    // });
-
     const res = await window.electron.ipcRenderer.invoke(
       'get-prediction', 
       apiUrl.value, 
@@ -33,51 +56,47 @@ const predictScore = async () => {
 
     if (res) {
       scores.value.unshift({
-        firstTeam: firstTeam.value.name,
-        predictedScore: res.predictedScore,
-        secondTeam: secondTeam.value.name,
+        firstTeam: res.home,
+        secondTeam: res.away,
+        homeWin: Math.floor(res.probabilities.home_win * 1000) / 1000,
+        awayWin: Math.floor(res.probabilities.away_win * 1000) / 1000,
+        draw: Math.floor(res.probabilities.draw * 1000) / 1000,
       });
     }
-  };
+  }
 }
-
-onMounted(async () => {
-  const res = await window.electron.ipcRenderer.invoke('get-teams', apiToken.value);
-
-  allTeams.value = res['teams'].map((team: any) => ({ name: team.name }));
-});
 </script>
 
 <template>
   <div class="grid gap-2 m-2">
     <div class="flex gap-2">
       <InputText size="small" v-model="apiUrl" class="w-full" placeholder="API URL..." />
-      <InputText size="small" v-model="apiToken" class="w-full" placeholder="API Token..." />
+      <!-- <InputText size="small" v-model="apiToken" class="w-full" placeholder="API Token..." /> -->
     </div>
     <Panel>
       <div class="grid grid-cols-[1fr_auto_auto_auto_1fr] gap-2">
         <div class="flex flex-col gap-2">
-          <label class="font-bold mx-auto text-lg">First team</label>
-          <Select size="large" v-model="firstTeam" filter :options="allTeams.filter((el) => el !== secondTeam)" optionLabel="name" placeholder="First team name... " class="w-full" />
+          <label class="font-bold mx-auto text-lg">Home Team</label>
+          <Select size="large" v-model="firstTeam" filter :options="allTeams.filter(el => el.name !== secondTeam?.name)" optionLabel="name" placeholder="First team name... " class="w-full" />
         </div>
         <Divider layout="vertical" />
         <div class="grid gap-2">
-          <label class="font-bold mx-auto text-lg">Predicted Score</label>
-          <InputText size="large" class="pointer-events-none text-lg! text-center" :placeholder="scores[0]?.predictedScore.toString() || 'Predicted score...'"/>
-          <Button class="w-full" label="Predict score" @click="predictScore" />
+          <Button class="w-full" size="large" label="Prediction" @click="predictScore" />
         </div>
         <Divider layout="vertical" />
         <div class="flex flex-col gap-2">
-          <label class="font-bold mx-auto text-lg">Second team</label>
-          <Select size="large" v-model="secondTeam" filter :options="allTeams.filter((el) => el !== firstTeam)" optionLabel="name" placeholder="First team name... " class="w-full" />
+          <label class="font-bold mx-auto text-lg">Away Team</label>
+          <Select size="large" v-model="secondTeam" filter :options="allTeams.filter(el => el.name !== firstTeam?.name)" optionLabel="name" placeholder="First team name... " class="w-full" />
         </div>
       </div> 
     </Panel>
-    <Panel header="Predicted scores table" class="flex flex-column h-118">
+    <Panel header="Predicted probabilities" class="flex flex-column h-118">
       <DataTable columnResizeMode="expand" scrollable scrollHeight="100%" :value="scores" size="large" showGridlines paginator :rows="5" removableSort>
-        <Column :style="{ textAlign: 'center' }" field="firstTeam" header="First Team" sortable class="w-1/3" />
-        <Column :style="{ textAlign: 'center' }" field="predictedScore" header="Predicted Score" class="w-1/3" />
-        <Column :style="{ textAlign: 'center' }" field="secondTeam" header="Second Team" sortable class="w-1/3" />
+        <Column :style="{ textAlign: 'center' }" removable field="firstTeam" header="Home Team" sortable class="w-1/5" />
+        <Column :style="{ textAlign: 'center' }" field="homeWin" header="Home Win Prob" class="w-1/5" />
+        <Column :style="{ textAlign: 'center' }" field="draw" header="Draw Prob" class="w-1/5" />
+        <Column :style="{ textAlign: 'center' }" field="awayWin" header="Away Win Prob" class="w-1/5" />
+        <Column :style="{ textAlign: 'center' }" field="secondTeam" header="Away Team" sortable class="w-1/5" />
       </DataTable>
     </Panel>
   </div>

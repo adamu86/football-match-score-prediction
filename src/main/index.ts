@@ -11,7 +11,7 @@ function createWindow(): void {
     useContentSize: true,
     autoHideMenuBar: true,
     width: 1014,
-    height: 754,
+    height: 700,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -37,37 +37,39 @@ function createWindow(): void {
   }
 }
 
-ipcMain.handle('get-teams', async (event, token) => {
-  const res = await fetch('https://api.football-data.org/v4/competitions/PL/teams', {
-    headers: {
-      'X-Auth-Token': token,
-      'Content-Type': 'application/json'
-    }
-  })
+// ipcMain.handle('get-teams', async (event, token) => {
+//   const res = await fetch('https://api.football-data.org/v4/', {
+//     headers: {
+//       'X-Auth-Token': token,
+//       'Content-Type': 'application/json'
+//     }
+//   })
 
-  const data = await res.json()
+//   const data = await res.json()
 
-  return data
-});
+//   return data
+// });
 
 ipcMain.handle('get-prediction', async (event, apiUrl: string, teams: { firstTeam: string; secondTeam: string }) => {
-    const params = new URLSearchParams({
-      firstTeam: teams.firstTeam,
-      secondTeam: teams.secondTeam
-    })
+  // Tworzymy parametry zgodnie z API
+  const params = new URLSearchParams({
+    home: teams.firstTeam,
+    away: teams.secondTeam
+  })
 
-    const url = `${apiUrl}?${params.toString()}`
+  const url = `${apiUrl}?${params.toString()}`
 
-    const res = await fetch(url, { method: 'GET' })
+  const res = await fetch(url, { method: 'GET' })
 
-    if (!res.ok) {
-      return { success: false, error: `Error: ${res.status} ${res.statusText}` }
-    }
-
-    const data = await res.json()
-    return data
+  if (!res.ok) {
+    return { success: false, error: `Error: ${res.status} ${res.statusText}` }
   }
-)
+
+  const data = await res.json()
+  
+  return data
+})
+
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
