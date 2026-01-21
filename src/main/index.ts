@@ -50,11 +50,11 @@ function createWindow(): void {
 //   return data
 // });
 
-ipcMain.handle('get-prediction', async (event, apiUrl: string, teams: { firstTeam: string; secondTeam: string }) => {
+ipcMain.handle('get-prediction', async (event, apiUrl: string, teams: { homeTeam: string; awayTeam: string }) => {
   // Tworzymy parametry zgodnie z API
   const params = new URLSearchParams({
-    home: teams.firstTeam,
-    away: teams.secondTeam
+    home: teams.homeTeam,
+    away: teams.awayTeam
   })
 
   const url = `${apiUrl}?${params.toString()}`

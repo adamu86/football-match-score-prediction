@@ -8,9 +8,9 @@ import { ref } from 'vue';
 import Select from 'primevue/select';
 
 const apiUrl = ref('http://127.0.0.1:8000/predict');
-// const apiToken = ref('08b4becd5ec4458f851f529c019aca36');
-const firstTeam = ref<{ name: string }>();
-const secondTeam = ref<{ name: string }>();
+// const apiToken = ref(' // token tutaj do API // ');
+const homeTeam = ref<{ name: string }>();
+const awayTeam = ref<{ name: string }>();
 const allTeams = [
   { name: "Liverpool" },
   { name: "Bournemouth" },
@@ -35,29 +35,30 @@ const allTeams = [
   { name: "West Ham" },
   { name: "Chelsea" }
 ];
+
 const scores = ref<{ 
-  firstTeam: string, 
-  secondTeam: string, 
+  homeTeam: string, 
+  awayTeam: string, 
   homeWin: number,
   awayWin: number,
   draw: number,
 }[]>([]);
 
 const predictScore = async () => {
-  if (firstTeam.value && secondTeam.value) {
+  if (homeTeam.value && awayTeam.value) {
     const res = await window.electron.ipcRenderer.invoke(
       'get-prediction', 
       apiUrl.value, 
       { 
-        firstTeam: firstTeam.value.name, 
-        secondTeam: secondTeam.value.name 
+        homeTeam: homeTeam.value.name,
+        awayTeam: awayTeam.value.name 
       }
     );
 
     if (res) {
       scores.value.unshift({
-        firstTeam: res.home,
-        secondTeam: res.away,
+        homeTeam: res.home,
+        awayTeam: res.away,
         homeWin: Math.floor(res.probabilities.home_win * 1000) / 1000,
         awayWin: Math.floor(res.probabilities.away_win * 1000) / 1000,
         draw: Math.floor(res.probabilities.draw * 1000) / 1000,
@@ -77,7 +78,7 @@ const predictScore = async () => {
       <div class="grid grid-cols-[1fr_auto_auto_auto_1fr] gap-2">
         <div class="flex flex-col gap-2">
           <label class="font-bold mx-auto text-lg">Home Team</label>
-          <Select size="large" v-model="firstTeam" filter :options="allTeams.filter(el => el.name !== secondTeam?.name)" optionLabel="name" placeholder="First team name... " class="w-full" />
+          <Select size="large" v-model="homeTeam" filter :options="allTeams.filter(el => el.name !== awayTeam?.name)" optionLabel="name" placeholder="First team name... " class="w-full" />
         </div>
         <Divider layout="vertical" />
         <div class="grid gap-2">
@@ -86,17 +87,17 @@ const predictScore = async () => {
         <Divider layout="vertical" />
         <div class="flex flex-col gap-2">
           <label class="font-bold mx-auto text-lg">Away Team</label>
-          <Select size="large" v-model="secondTeam" filter :options="allTeams.filter(el => el.name !== firstTeam?.name)" optionLabel="name" placeholder="First team name... " class="w-full" />
+          <Select size="large" v-model="awayTeam" filter :options="allTeams.filter(el => el.name !== homeTeam?.name)" optionLabel="name" placeholder="First team name... " class="w-full" />
         </div>
       </div> 
     </Panel>
     <Panel header="Predicted probabilities" class="flex flex-column h-118">
       <DataTable columnResizeMode="expand" scrollable scrollHeight="100%" :value="scores" size="large" showGridlines paginator :rows="5" removableSort>
-        <Column :style="{ textAlign: 'center' }" removable field="firstTeam" header="Home Team" sortable class="w-1/5" />
+        <Column :style="{ textAlign: 'center' }" field="homeTeam" header="Home Team" sortable class="w-1/5" />
         <Column :style="{ textAlign: 'center' }" field="homeWin" header="Home Win Prob" class="w-1/5" />
         <Column :style="{ textAlign: 'center' }" field="draw" header="Draw Prob" class="w-1/5" />
         <Column :style="{ textAlign: 'center' }" field="awayWin" header="Away Win Prob" class="w-1/5" />
-        <Column :style="{ textAlign: 'center' }" field="secondTeam" header="Away Team" sortable class="w-1/5" />
+        <Column :style="{ textAlign: 'center' }" field="awayTeam" header="Away Team" sortable class="w-1/5" />
       </DataTable>
     </Panel>
   </div>
